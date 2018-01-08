@@ -52,11 +52,13 @@ if __name__ == '__main__':
     optimizer_p = optim.Adam([model.P], lr = 0.02)
     optimizer_q = optim.Adam([model.Q], lr = 0.02)
 
+    losses = list()
     for i in range(1000):
         update_param_gaussian(R, model, optimizer_p, missing=True)
         model.project()
         loss = update_param_gaussian(R, model, optimizer_q, missing=True)
         model.project()
+        losses.append(loss)
 
         if i % 100 == 0:
             print("Epoch {}: Loss:{}".format(i+1, loss))
@@ -67,4 +69,10 @@ if __name__ == '__main__':
 
     print("P:{}".format(model.P.data))
     print("Q:{}".format(model.Q.data))
+    import matplotlib.pyplot as plt
+    plt.plot(list(range(len(losses))), losses)
+    plt.title("ELBO")
+    plt.xlabel("step")
+    plt.ylabel("loss")
+    plt.show()
 

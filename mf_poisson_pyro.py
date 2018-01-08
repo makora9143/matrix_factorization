@@ -15,15 +15,15 @@ class PoissonMF(nn.Module):
         self.K = K
 
     def model(self, data):
-        u_a0 = Variable(torch.ones(self.data_size[0], self.K) * 10.)
-        u_b0 = Variable(torch.ones(self.data_size[0], self.K) * 10.)
+        u_a0 = Variable(torch.ones(self.data_size[0], self.K))
+        u_b0 = Variable(torch.ones(self.data_size[0], self.K))
 
-        v_a0 = Variable(torch.ones(self.data_size[1], self.K) * 10.)
-        v_b0 = Variable(torch.ones(self.data_size[1], self.K) * 10.)
+        v_a0 = Variable(torch.ones(self.data_size[1], self.K))
+        v_b0 = Variable(torch.ones(self.data_size[1], self.K))
 
         u = pyro.sample('u', dist.gamma, u_a0, u_b0)
         v = pyro.sample('v', dist.gamma, v_a0, v_b0)
-        s = pyro.sample('s', dist.poisson, F.softplus(torch.matmul(u, torch.t(v))))
+        s = pyro.sample('s', dist.poisson, F.relu(torch.matmul(u, torch.t(v))))
 
         for i in pyro.irange("row_loop", self.data_size[0]):
             for j in pyro.irange("col_loop", self.data_size[1]):
@@ -36,26 +36,23 @@ class PoissonMF(nn.Module):
                              )
 
     def guide(self, data):
-        qu_a0 = Variable(torch.rand(self.data_size[0], self.K), requires_grad=True)
-        qu_b0 = Variable(torch.rand(self.data_size[0], self.K), requires_grad=True)
+        log_qu_a0 = Variable(torch.randn(self.data_size[0], self.K), requires_grad=True)
+        log_qu_b0 = Variable(torch.randn(self.data_size[0], self.K), requires_grad=True)
 
-        qv_a0 = Variable(torch.rand(self.data_size[1], self.K), requires_grad=True)
-        qv_b0 = Variable(torch.rand(self.data_size[1], self.K), requires_grad=True)
+        log_qv_a0 = Variable(torch.randn(self.data_size[1], self.K), requires_grad=True)
+        log_qv_b0 = Variable(torch.randn(self.data_size[1], self.K), requires_grad=True)
 
-        qu_a0 = pyro.param('qu_a0', qu_a0)
-        qu_b0 = pyro.param('qu_b0', qu_b0)
+        log_qu_a0 = pyro.param('log_qu_a0', log_qu_a0)
+        log_qu_b0 = pyro.param('log_qu_b0', log_qu_b0)
 
-        qv_a0 = pyro.param('qv_a0', qv_a0)
-        qv_b0 = pyro.param('qv_b0', qv_b0)
+        log_qv_a0 = pyro.param('log_qv_a0', log_qv_a0)
+        log_qv_b0 = pyro.param('log_qv_b0', log_qv_b0)
 
-        qu_a = F.softplus(qu_a0) 
-        qu_b = F.softplus(qu_b0)
+        qu_a0, qu_b0 = torch.exp(log_qu_a0), torch.exp(log_qu_b0)
+        qv_a0, qv_b0 = torch.exp(log_qv_a0), torch.exp(log_qv_b0)
 
-        qv_a = F.softplus(qv_a0)
-        qv_b = F.softplus(qv_b0)
-
-        u = pyro.sample('u', dist.gamma, qu_a, qu_b)
-        v = pyro.sample('v', dist.gamma, qv_a, qv_b)
+        u = pyro.sample('u', dist.normal, qu_a0, qu_b0)
+        v = pyro.sample('v', dist.normal, qv_a0, qv_b0)
         pyro.sample('s', dist.poisson, F.softplus(torch.matmul(u, torch.t(v))))
 
 

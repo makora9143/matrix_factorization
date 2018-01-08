@@ -1,4 +1,4 @@
-# Probabilistic Matrix Factoriazation
+# Probabilistic Matrix Factorization
 
 This repository is implemented with Pytorch or Pyro.
 
