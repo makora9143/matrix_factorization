@@ -61,15 +61,18 @@ if __name__ == '__main__':
                 ]
             ))
 
-    mf = GaussianMF(R.size(), 2)
+    mf = GaussianMF(R.size(), 5)
 
     adam_params = {"lr": 0.0005, "betas": (0.90, 0.999)}
     optimizer = Adam(adam_params)
+    epochs = 10000
 
     svi = SVI(mf.model, mf.guide, optimizer, loss="ELBO", num_particles=10)
 
-    for step in range(1000):
+    losses = list()
+    for step in range(epochs):
         loss = svi.step(R)
+        losses.append(loss)
         if step % 100 == 0:
             print(step, loss)
 
@@ -78,3 +81,10 @@ if __name__ == '__main__':
 
     print(R)
     print(torch.matmul(qu, torch.t(qv)))
+    import matplotlib.pyplot as plt
+
+    plt.plot(list(range(epochs)), losses)
+    plt.title("ELBO")
+    plt.xlabel("step")
+    plt.ylabel("loss")
+    plt.show()
