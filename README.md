@@ -7,12 +7,6 @@ This repository is implemented with Pytorch or Pyro.
 
 
 ## Gaussian Matrix Factorization
-
-```math
-\begin{eqnarray}
-\mathbf{X} $\sim$ p(\mathbf{X} | \mathbf{U}, \mathbf{V}) \\
-$=$ \mathcal{N}(\mathbf{X} | \mathbf{U}^T \mathbf{V}, \mathbf{I})
-\end{eqnarray}
-```
+<img src="https://latex.codecogs.com/gif.latex?\mathbf{X}&space;$\sim$&space;p(\mathbf{X}&space;|&space;\mathbf{U},&space;\mathbf{V})&space;\\&space;p(\mathbf{X}&space;|&space;\mathbf{U},&space;\mathbf{V})&space;$=$&space;\mathcal{N}(\mathbf{X}&space;|&space;\mathbf{U}^T&space;\mathbf{V},&space;\mathbf{I})">
 
 ![ELBO](https://raw.githubusercontent.com/makora9143/probabilistic_matrix_factorization/images/Gaussian_MF_ELBO.png)
